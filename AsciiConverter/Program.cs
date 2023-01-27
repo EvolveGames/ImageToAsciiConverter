@@ -15,48 +15,53 @@ namespace AsciiConverter
         {
             while(true)
             {
-                char[] chars = { '#', '#', '@', '%', '=', '+', '*', ':', '-', ' ', ' ' };
-
-                Console.Write("Image Directory: ");
-                string imageDirectory = Console.ReadLine();
-
-                Console.Write("Name: ");
-                string nameDirectory = Console.ReadLine();
-                Console.Write("Scale in (%): ");
-                float imageScale = float.Parse(Console.ReadLine());
-
-                var bm = new Bitmap(imageDirectory);
-
-                float prw = bm.Width / 100;
-                float prh = bm.Height / 100;
-                Bitmap image = resizeImage(bm, new Size((int)(prw * imageScale), (int)(prh * (imageScale / 2))));
-
-                StringBuilder sb;
-
-                string fileDirectory = Path.Combine(Directory.GetCurrentDirectory(), $"{nameDirectory}.ascii");
-
-                if (File.Exists(fileDirectory)) File.Delete(fileDirectory);
-                FileStream stream = new FileStream(fileDirectory, FileMode.CreateNew);
-                using (StreamWriter writer = new StreamWriter(stream))
+                try
                 {
-                    sb = new StringBuilder();
+                    char[] chars = { '#', '#', '@', '%', '=', '+', '*', ':', '-', ' ', ' ' };
 
-                    for (int h = 0; h < image.Height; h++)
+                    Console.Write("Image Directory: ");
+                    string imageDirectory = Console.ReadLine();
+
+                    Console.Write("Name: ");
+                    string nameDirectory = Console.ReadLine();
+                    Console.Write("Scale in (%): ");
+                    float imageScale = float.Parse(Console.ReadLine());
+
+                    var bm = new Bitmap(imageDirectory);
+
+                    float prw = bm.Width / 100;
+                    float prh = bm.Height / 100;
+                    Bitmap image = resizeImage(bm, new Size((int)(prw * imageScale), (int)(prh * (imageScale / 2))));
+
+                    StringBuilder sb;
+
+                    string fileDirectory = Path.Combine(Directory.GetCurrentDirectory(), $"{nameDirectory}.ascii");
+
+                    if (File.Exists(fileDirectory)) File.Delete(fileDirectory);
+                    FileStream stream = new FileStream(fileDirectory, FileMode.CreateNew);
+                    using (StreamWriter writer = new StreamWriter(stream))
                     {
-                        for (int w = 0; w < image.Width; w++)
-                        {
-                            Color cl = ((Bitmap)image).GetPixel(w, h);
-                            int gray = (cl.R + cl.G + cl.B) / 3;
-                            int index = (gray * (chars.Length - 1)) / 255;
+                        sb = new StringBuilder();
 
-                            sb.Append(chars[index]);
+                        for (int h = 0; h < image.Height; h++)
+                        {
+                            for (int w = 0; w < image.Width; w++)
+                            {
+                                Color cl = ((Bitmap)image).GetPixel(w, h);
+                                int gray = (cl.R + cl.G + cl.B) / 3;
+                                int index = (gray * (chars.Length - 1)) / 255;
+
+                                sb.Append(chars[index]);
+                            }
+                            sb.Append('\n');
                         }
-                        sb.Append('\n');
+                        writer.WriteLine(sb.ToString());
+                        Console.WriteLine(sb.ToString());
                     }
-                    writer.WriteLine(sb.ToString());
-                    Console.WriteLine(sb.ToString());
+                    Console.ReadKey(true);
                 }
-                Console.ReadKey(true);
+                catch
+                { }
             }
         }
         private static Bitmap resizeImage(Bitmap imgToResize, Size size)
